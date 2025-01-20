@@ -11,10 +11,10 @@ def get_stock_data():
     
     stock = yf.Ticker(ticker)
     info = stock.info
-    
-    # Fetch next earnings date safely
-    earnings_dates = stock.earnings_dates
-    next_earnings_date = earnings_dates.index[0] if not earnings_dates.empty else "N/A"
+
+    # Handle ETFs (No earnings date)
+    earnings_dates = stock.earnings_dates if hasattr(stock, "earnings_dates") else None
+    next_earnings_date = str(earnings_dates.index[0]) if earnings_dates is not None and not earnings_dates.empty else "N/A"
 
     # Calculate stock price change and percentage
     current_price = info.get("currentPrice", 0)
@@ -31,7 +31,7 @@ def get_stock_data():
     stock_data = {
         "ticker": ticker,
         "name": info.get("shortName", "N/A"),
-        "next_earnings_date": str(next_earnings_date),
+        "next_earnings_date": next_earnings_date,  # Now safely handles ETFs
         "pe_ratio": info.get("trailingPE", "N/A"),
         "forward_pe": info.get("forwardPE", "N/A"),
         "peg_ratio": info.get("pegRatio", "N/A"),
